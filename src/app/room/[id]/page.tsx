@@ -16,10 +16,12 @@ import {
   doc,
   onSnapshot,
   addDoc,
-  setDoc,
   deleteDoc,
+  query,
+  where,
+  getDocs,
 } from 'firebase/firestore'
-import { useEffect, useRef, useState } from 'react'
+import { ChangeEvent, useEffect, useRef, useState } from 'react'
 import {
   Button,
   FormControl,
@@ -49,49 +51,56 @@ export default function Room({ params }: IRoomPageParams) {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [user, setUser] = useState<IUser | null>(null)
   const [users, setUsers] = useState<IUser[]>([])
-  const [value, setValue] = useState('')
-  const handleChange = (event) => setValue(event.target.value)
+  const [userName, setUsername] = useState('')
+
   const { isOpen, onOpen, onClose } = useDisclosure()
   const router = useRouter()
+  
+  const handleChange = (event) => setUsername(event.target.value)
 
-  // const data = await getData()
   const getNotes = async () => {
-    console.log(params.id)
-
     const docRef = doc(database, 'rooms', params.id)
+
     const docSnap = await getDoc(docRef)
-    onSnapshot(docRef, (querySnapshot) => {
-      console.log(querySnapshot.data())
-    })
-    if (docSnap.exists()) {
-      console.log('Document data:', docSnap.data())
-    } else {
-      // docSnap.data() will be undefined in this case
-      console.log('No such document!')
+
+    if (!docSnap.exists()) {
+      console.error('No room with id: ', params.id)
+
       router.push(`/`)
-    }
 
-    // getDocs(dbInstance).then((data) => {
-    //   const readableData = data.docs.map((item) => {
-    //     return { ...item.data(), id: item.id }
-    //   })
-    //   console.log(readableData)
-    // })
+      return
+    } 
 
+    userChangeSnapshotListener()
+    estimateChangeSnapshotListener()
+  }
+
+  const userChangeSnapshotListener = () => {
     let collectionRef = collection(dbInstance, params.id, 'users')
 
     onSnapshot(collectionRef, (querySnapshot) => {
       const newUsers: IUser[] = []
-      querySnapshot.forEach((doc) => {
-        console.log('Id: ', doc.id, 'Data: ', doc.data())
 
+      querySnapshot.forEach((doc) => {
+        console.log('Users data: ', doc.data())
         newUsers.push({ id: doc.id, userName: doc.data().userName })
       })
+
       if (newUsers.length <= 0) {
         onOpen()
       }
-      console.log(newUsers)
+
       setUsers(newUsers)
+    })
+  }
+
+  const estimateChangeSnapshotListener = () => {
+    let collectionRef = collection(dbInstance, params.id, 'estimates')
+
+    onSnapshot(collectionRef, (querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        console.log('Estimates data: ', doc.data())
+      })
     })
   }
 
@@ -101,52 +110,39 @@ export default function Room({ params }: IRoomPageParams) {
     if (!cookie) {
       onOpen()
     } else {
-      const jsonParse: IUser = JSON.parse(cookie)
-      console.log(jsonParse.userName)
-      if (!jsonParse.userName || !jsonParse.id) {
+      const cookieUser: IUser = JSON.parse(cookie)
+      console.log(cookieUser.userName)
+      if (!cookieUser.userName || !cookieUser.id) {
         onOpen()
       } else {
-        setUser({ userName: jsonParse.userName, id: jsonParse.id })
+        setUser({ userName: cookieUser.userName, id: cookieUser.id })
+        getData(cookieUser.id)
       }
-      // setUser(cookie)
     }
-
     getNotes()
-
     setIsLoading(false)
   }, [])
 
-  // const createNewUser = async () => {
-  //   console.log('createNewUser')
-  //   // const docRef = doc(database, 'rooms', params.id, 'estimates')
+  const getData = async (userId: string) => {
+    const q = query(collection(dbInstance, params.id, 'estimates'), where("userId", "==", userId));
 
-  //   // collectionRef.
+    const querySnapshot = await getDocs(q);
 
-  //   const response = await setDoc(
-  //     doc(database, 'rooms', `${params.id}/estimates/new`),
-  //     {
-  //       test: 'eee',
-  //     },
-  //     { merge: true }
-  //   )
-  //   // (docRef, {
-  //   //   name: 'Los Angeles',
-  //   //   state: 'CA',
-  //   //   country: 'USA',
-  //   // })
-
-  //   console.log({ response })
-  // }
+    querySnapshot.forEach((doc) => {
+      setEstimatedValue(doc.data().estimate)
+      setEstimateId(doc.id)
+    });
+  }
 
   const deleteEstimate = async () => {
     await deleteDoc(doc(database, 'rooms', `${params.id}/estimates/new`))
   }
 
-  const createUser = async () => {
+  const saveUser = async () => {
     let collectionRef = collection(dbInstance, params.id, 'users')
 
     const response = await addDoc(collectionRef, {
-      userName: value,
+      userName: userName,
     })
 
     console.log({ response })
@@ -154,13 +150,13 @@ export default function Room({ params }: IRoomPageParams) {
     setCookie(
       'pokerestUserCookie',
       JSON.stringify({
-        userName: value,
+        userName: userName,
         id: response.id,
       })
     )
 
     setUser({
-      userName: value,
+      userName: userName,
       id: response.id,
     })
     onClose()
@@ -239,12 +235,12 @@ export default function Room({ params }: IRoomPageParams) {
           <ModalBody pb={6}>
             <FormControl>
               <FormLabel>Name</FormLabel>
-              <Input value={value} onChange={handleChange} placeholder="Name" />
+              <Input value={userName} onChange={handleChange} placeholder="Name" />
             </FormControl>
           </ModalBody>
 
           <ModalFooter>
-            <Button onClick={createUser} colorScheme="blue" mr={3}>
+            <Button onClick={saveUser} colorScheme="blue" mr={3}>
               Save
             </Button>
             <Button onClick={onClose}>Cancel</Button>

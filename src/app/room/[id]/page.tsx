@@ -49,7 +49,7 @@ export default function Room({ params }: IRoomPageParams) {
   const [estimatedValue, setEstimatedValue] = useState<number | null>(null)
   const [estimateId, setEstimateId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [user, setUser] = useState<IUser | null>(null)
+  const [currentUser, setUser] = useState<IUser | null>(null)
   const [users, setUsers] = useState<IUser[]>([])
   const [userName, setUsername] = useState('')
 
@@ -115,6 +115,7 @@ export default function Room({ params }: IRoomPageParams) {
       if (!cookieUser.userName || !cookieUser.id) {
         onOpen()
       } else {
+        // TODO: user postoji u cookie, ali nije dodan u room na firebase
         setUser({ userName: cookieUser.userName, id: cookieUser.id })
         getData(cookieUser.id)
       }
@@ -135,10 +136,6 @@ export default function Room({ params }: IRoomPageParams) {
       setEstimatedValue(doc.data().estimate)
       setEstimateId(doc.id)
     })
-  }
-
-  const deleteEstimate = async () => {
-    await deleteDoc(doc(database, 'rooms', `${params.id}/estimates/new`))
   }
 
   const saveUser = async () => {
@@ -190,10 +187,10 @@ export default function Room({ params }: IRoomPageParams) {
       return setEstimatedValue(null)
     }
 
-    if (user?.id) {
+    if (currentUser?.id) {
       const response = await addDoc(collectionRef, {
         estimate: value,
-        userId: user.id,
+        userId: currentUser.id,
       })
       console.log({ response })
       setEstimatedValue(value)
@@ -205,18 +202,17 @@ export default function Room({ params }: IRoomPageParams) {
 
   return (
     <div>
-      <h1>{!!user?.userName ? user?.userName : 'nema'}</h1>
+      <h1>
+        Current user:{' '}
+        <b>{!!currentUser?.userName ? currentUser?.userName : 'nema'}</b>
+      </h1>
       <div>
-        <span>Mapirani useri:</span>
+        <span>Other users in room:</span>
         {users.length > 0 &&
-          users.map((user) => <p key={user.id}>{user.userName}</p>)}
+          users
+            .filter((user) => user.id !== currentUser?.id)
+            .map((user) => <p key={user.id}>{user.userName}</p>)}
       </div>
-      {/* <Button onClick={createNewUser} colorScheme="blue">
-        Create user
-      </Button> */}
-      <Button onClick={deleteEstimate} colorScheme="blue">
-        Delete user
-      </Button>
       {!!estimatedValue && <span>{estimatedValue}</span>}
       <div>
         {[2, 4, 6, 8].map((estimateValue) => (

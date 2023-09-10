@@ -21,7 +21,7 @@ import {
   where,
   getDocs,
 } from 'firebase/firestore'
-import { ChangeEvent, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Button,
   FormControl,
@@ -55,7 +55,7 @@ export default function Room({ params }: IRoomPageParams) {
 
   const { isOpen, onOpen, onClose } = useDisclosure()
   const router = useRouter()
-  
+
   const handleChange = (event) => setUsername(event.target.value)
 
   const getNotes = async () => {
@@ -69,7 +69,7 @@ export default function Room({ params }: IRoomPageParams) {
       router.push(`/`)
 
       return
-    } 
+    }
 
     userChangeSnapshotListener()
     estimateChangeSnapshotListener()
@@ -124,14 +124,17 @@ export default function Room({ params }: IRoomPageParams) {
   }, [])
 
   const getData = async (userId: string) => {
-    const q = query(collection(dbInstance, params.id, 'estimates'), where("userId", "==", userId));
+    const q = query(
+      collection(dbInstance, params.id, 'estimates'),
+      where('userId', '==', userId)
+    )
 
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await getDocs(q)
 
     querySnapshot.forEach((doc) => {
       setEstimatedValue(doc.data().estimate)
       setEstimateId(doc.id)
-    });
+    })
   }
 
   const deleteEstimate = async () => {
@@ -235,7 +238,11 @@ export default function Room({ params }: IRoomPageParams) {
           <ModalBody pb={6}>
             <FormControl>
               <FormLabel>Name</FormLabel>
-              <Input value={userName} onChange={handleChange} placeholder="Name" />
+              <Input
+                value={userName}
+                onChange={handleChange}
+                placeholder="Name"
+              />
             </FormControl>
           </ModalBody>
 

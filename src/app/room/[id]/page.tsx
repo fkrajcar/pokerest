@@ -21,7 +21,7 @@ import {
   where,
   getDocs,
 } from 'firebase/firestore'
-import { useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import {
   Button,
   FormControl,
@@ -56,7 +56,8 @@ export default function Room({ params }: IRoomPageParams) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const router = useRouter()
 
-  const handleChange = (event) => setUsername(event.target.value)
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) =>
+    setUsername(event?.target?.value)
 
   const getNotes = async () => {
     const docRef = doc(database, 'rooms', params.id)

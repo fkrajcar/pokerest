@@ -43,6 +43,7 @@ const dbInstance = collection(database, 'rooms')
 interface IUser {
   id: string
   userName: string
+  estimate?: number
 }
 
 export default function Room({ params }: IRoomPageParams) {
@@ -52,6 +53,7 @@ export default function Room({ params }: IRoomPageParams) {
   const [currentUser, setUser] = useState<IUser | null>(null)
   const [users, setUsers] = useState<IUser[]>([])
   const [userName, setUsername] = useState('')
+  const [displayData, setDisplayData] = useState<boolean>(false)
 
   const { isOpen, onOpen, onClose } = useDisclosure()
   const router = useRouter()
@@ -74,6 +76,56 @@ export default function Room({ params }: IRoomPageParams) {
 
     userChangeSnapshotListener()
     estimateChangeSnapshotListener()
+    displayDataChangeListener()
+  }
+
+  const displayDataChangeListener = () => {
+    // const collectionRef = firebase.firestore().collection('myCollection');
+    // let collectionRef = collection(dbInstance, params.id)
+    const docRef = doc(database, 'rooms', params.id)
+
+    // Create a query to listen for changes in the collection
+    // const query = collectionRef.where('fieldName', '!=', null)
+
+    //   docRef.on('value', (snapshot) => {
+    //   const fieldValue = snapshot.val();
+    //   console.log('Field Value Changed:', fieldValue);
+
+    //   // Handle the changed value here, such as updating your component's state
+    // });
+
+    const q = query(collection(docRef, 'display'))
+    console.log({ q })
+    onSnapshot(docRef, (querySnapshot) => {
+      // console.log({ querySnapshot })
+      const data = querySnapshot.data()
+
+      console.log(data?.display)
+      setDisplayData(data?.display)
+      // querySnapshot.forEach((doc) => {
+      //   console.log('Users data: ', doc.data())
+      //   // newUsers.push({ id: doc.id, userName: doc.data().userName })
+      // })
+      // console.log('Current cities in CA: ', cities.join(', '))
+    })
+    // const unsub = onSnapshot(
+    //   doc(database, 'rooms', 'SF'),
+    //   { includeMetadataChanges: true },
+    //   (doc) => {
+    //     // ...
+    //   }
+    // )
+
+    // const unsubscribe = q.onSnapshot((querySnapshot) => {
+    //   // Loop through the documents in the query result
+    //   querySnapshot.forEach((doc) => {
+    //     // Access the specific field 'fieldName' in each document
+    //     const fieldData = doc.get('fieldName')
+
+    //     // Update your component state with the field value
+    //     setFieldValue(fieldData)
+    //   })
+    // })
   }
 
   const userChangeSnapshotListener = () => {
@@ -81,17 +133,18 @@ export default function Room({ params }: IRoomPageParams) {
 
     onSnapshot(collectionRef, (querySnapshot) => {
       const newUsers: IUser[] = []
-
+      console.log('onSnapshot')
       querySnapshot.forEach((doc) => {
-        console.log('Users data: ', doc.data())
-        newUsers.push({ id: doc.id, userName: doc.data().userName })
+        const userData = doc.data()
+        console.log('Users data: ', doc.data(), userData)
+        newUsers.push({ id: doc.id, userName: userData.userName })
       })
 
       if (newUsers.length <= 0) {
         onOpen()
       }
-
-      setUsers(newUsers)
+      console.log({ newUsers })
+      setUsers([...newUsers])
     })
   }
 
@@ -99,8 +152,27 @@ export default function Room({ params }: IRoomPageParams) {
     let collectionRef = collection(dbInstance, params.id, 'estimates')
 
     onSnapshot(collectionRef, (querySnapshot) => {
+      const usersData = [...users]
       querySnapshot.forEach((doc) => {
-        console.log('Estimates data: ', doc.data())
+        const docData = doc.data()
+        console.log('Estimates data: ', docData)
+        console.log({ usersData })
+
+        const newData = usersData.map((userData) => {
+          if (docData.userId === userData.id) {
+            console.log('dadada')
+
+            return {
+              ...userData,
+              estimate: docData.estimate,
+            }
+          }
+
+          return userData
+        })
+
+        console.log({ newData })
+        // usersData.find()
       })
     })
   }
@@ -201,6 +273,18 @@ export default function Room({ params }: IRoomPageParams) {
     }
   }
 
+  const getValues = async () => {
+    console.log('test')
+    let collectionRef = collection(dbInstance, params.id, 'estimates')
+    // const docSnap = await getDoc(collectionRef)
+    const querySnapshot = await getDocs(collectionRef)
+    console.log({ querySnapshot })
+    querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      console.log(doc.id, ' => ', doc.data())
+    })
+  }
+
   return (
     <div>
       <h1>
@@ -215,6 +299,11 @@ export default function Room({ params }: IRoomPageParams) {
             .map((user) => <p key={user.id}>{user.userName}</p>)}
       </div>
       {!!estimatedValue && <span>{estimatedValue}</span>}
+
+      <Button onClick={() => getValues()} colorScheme="blue">
+        Get values
+      </Button>
+      {displayData && <div>Pokazi svima</div>}
       <div>
         {[2, 4, 6, 8].map((estimateValue) => (
           <Button

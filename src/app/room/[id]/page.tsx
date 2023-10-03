@@ -20,6 +20,7 @@ import {
   query,
   where,
   getDocs,
+  setDoc,
 } from 'firebase/firestore'
 import { ChangeEvent, useEffect, useState } from 'react'
 import {
@@ -188,6 +189,10 @@ export default function Room({ params }: IRoomPageParams) {
       if (!cookieUser.userName || !cookieUser.id) {
         onOpen()
       } else {
+        if (cookieUser.id && cookieUser.id) {
+          joinRoom(cookieUser)
+          // saveUser(cookieUser.id)
+        }
         // TODO: user postoji u cookie, ali nije dodan u room na firebase
         setUser({ userName: cookieUser.userName, id: cookieUser.id })
         getData(cookieUser.id)
@@ -195,7 +200,38 @@ export default function Room({ params }: IRoomPageParams) {
     }
     getNotes()
     setIsLoading(false)
+
+    return () => {
+      removeFromRoom(currentUser)
+    }
   }, [])
+
+  const joinRoom = async (cookieUser: IUser) => {
+    // let collectionRef = collection(dbInstance, params.id, 'users')
+    // await setDoc(doc(db, "cities", "new-city-id"), data);
+
+    const response = await setDoc(
+      doc(database, 'rooms', params.id, 'users', cookieUser.id),
+      {
+        userName: cookieUser.userName,
+      }
+    )
+    // const response = await setDoc(collectionRef, {
+    //   userName: cookieUser.userName,
+    //   id: cookieUser.id,
+    // })
+
+    console.log('joinRoom', cookieUser.id, { response })
+  }
+
+  const removeFromRoom = async (cookieUser: IUser | null) => {
+    if (!cookieUser?.id) {
+      console.error('nema userId, removeFromRoom')
+      return
+    }
+
+    await deleteDoc(doc(database, 'rooms', params.id, 'users', cookieUser.id))
+  }
 
   const getData = async (userId: string) => {
     const q = query(
@@ -279,6 +315,8 @@ export default function Room({ params }: IRoomPageParams) {
     // const docSnap = await getDoc(collectionRef)
     const querySnapshot = await getDocs(collectionRef)
     console.log({ querySnapshot })
+    const data = querySnapshot.docs
+    console.log({ data })
     querySnapshot.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
       console.log(doc.id, ' => ', doc.data())
@@ -288,8 +326,7 @@ export default function Room({ params }: IRoomPageParams) {
   return (
     <div>
       <h1>
-        Current user:{' '}
-        <b>{!!currentUser?.userName ? currentUser?.userName : 'nema'}</b>
+        You are: <b>{!!currentUser?.userName ? currentUser?.userName : '/'}</b>
       </h1>
       <div>
         <span>Other users in room:</span>
@@ -302,6 +339,9 @@ export default function Room({ params }: IRoomPageParams) {
 
       <Button onClick={() => getValues()} colorScheme="blue">
         Get values
+      </Button>
+      <Button onClick={() => removeFromRoom(currentUser)} colorScheme="blue">
+        Remove from room
       </Button>
       {displayData && <div>Pokazi svima</div>}
       <div>
@@ -333,7 +373,7 @@ export default function Room({ params }: IRoomPageParams) {
           </ModalBody>
 
           <ModalFooter>
-            <Button onClick={saveUser} colorScheme="blue" mr={3}>
+            <Button onClick={() => saveUser()} colorScheme="blue" mr={3}>
               Save
             </Button>
             <Button onClick={onClose}>Cancel</Button>

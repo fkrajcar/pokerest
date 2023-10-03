@@ -4,55 +4,53 @@ import { addDoc, collection } from 'firebase/firestore'
 import styles from './page.module.css'
 import { database } from '../firebase/config'
 import { useRouter } from 'next/navigation'
-import { getCookie, setCookie } from 'cookies-next'
-import { useEffect } from 'react'
+import { useState } from 'react'
+import { Button, Spinner } from '@chakra-ui/react'
 
 const dbInstance = collection(database, 'rooms')
 
 export default function Home() {
   const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
 
   const saveRoom = () => {
-    return addDoc(dbInstance, {})
+    return addDoc(dbInstance, {
+      displayEstimates: false,
+    })
   }
 
-  useEffect(() => {
-    const cookie = getCookie('zix')
-
-    if (!cookie) {
-      console.log('nema')
-      // ovdje trazi da user postavi cookie i stvori userId
-    }
-    return () => {}
-  }, [])
-
   const createNewRoom = async () => {
-    try {
-      await setCookie('zix', { name: 'zix', userId: 'sadasda' })
+    setIsLoading(true)
 
-      console.log('createNewRoom')
+    try {
       const response = await saveRoom()
-      console.log('res', response.id)
       if (response.id) {
-        router.push(`/room/${response.id}`)
+        await router.push(`/room/${response.id}`)
       }
     } catch (e) {
       console.error(e)
+    } finally {
+      setIsLoading(false)
     }
   }
-  const getRoom = async (id: string) => {
-    console.log('getRoom')
-    fetch(`/api/room/${id}`)
-      .then((res) => {
-        console.log('component', res)
-      })
-      .catch((error) => {
-        console.error(error)
-      })
+
+  if (isLoading) {
+    return (
+      <Spinner
+        thickness="4px"
+        speed="0.65s"
+        emptyColor="gray.200"
+        color="blue.500"
+        size="xl"
+      />
+    )
   }
+
   return (
     <main className={styles.main}>
-      <button onClick={createNewRoom}>Create new room</button>
+      <Button onClick={createNewRoom} colorScheme="blue" disabled={isLoading}>
+        Create room
+      </Button>
     </main>
   )
 }

@@ -23,22 +23,9 @@ import {
   setDoc,
 } from 'firebase/firestore'
 import { ChangeEvent, useEffect, useState } from 'react'
-import {
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Spinner,
-  useDisclosure,
-} from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
+import { useDisclosure } from '@mantine/hooks'
+import { Button, Loader, Modal, TextInput } from '@mantine/core'
 const dbInstance = collection(database, 'rooms')
 
 interface IUser {
@@ -55,8 +42,8 @@ export default function Room({ params }: IRoomPageParams) {
   const [users, setUsers] = useState<IUser[]>([])
   const [userName, setUsername] = useState('')
   const [displayData, setDisplayData] = useState<boolean>(false)
+  const [opened, { open, close }] = useDisclosure(false)
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
   const router = useRouter()
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) =>
@@ -142,7 +129,7 @@ export default function Room({ params }: IRoomPageParams) {
       })
 
       if (newUsers.length <= 0) {
-        onOpen()
+        open()
       }
       console.log({ newUsers })
       setUsers([...newUsers])
@@ -182,12 +169,12 @@ export default function Room({ params }: IRoomPageParams) {
     setIsLoading(true)
     const cookie = getCookie('pokerestUserCookie')
     if (!cookie) {
-      onOpen()
+      open()
     } else {
       const cookieUser: IUser = JSON.parse(cookie)
       console.log(cookieUser.userName)
       if (!cookieUser.userName || !cookieUser.id) {
-        onOpen()
+        open()
       } else {
         if (cookieUser.id && cookieUser.id) {
           joinRoom(cookieUser)
@@ -268,19 +255,11 @@ export default function Room({ params }: IRoomPageParams) {
       userName: userName,
       id: response.id,
     })
-    onClose()
+    close()
   }
 
   if (isLoading) {
-    return (
-      <Spinner
-        thickness="4px"
-        speed="0.65s"
-        emptyColor="gray.200"
-        color="blue.500"
-        size="xl"
-      />
-    )
+    return <Loader speed="0.65s" color="blue" size="xl" />
   }
 
   const setEstimateValue = async (value: number) => {
@@ -337,48 +316,33 @@ export default function Room({ params }: IRoomPageParams) {
       </div>
       {!!estimatedValue && <span>{estimatedValue}</span>}
 
-      <Button onClick={() => getValues()} colorScheme="blue">
-        Get values
-      </Button>
-      <Button onClick={() => removeFromRoom(currentUser)} colorScheme="blue">
+      <Button onClick={() => getValues()}>Get values</Button>
+      <Button onClick={() => removeFromRoom(currentUser)}>
         Remove from room
       </Button>
       {displayData && <div>Pokazi svima</div>}
       <div>
         {[2, 4, 6, 8].map((estimateValue) => (
           <Button
-            key={`estimate-button-${estimateValue}`}
+            key={`estimate-Button-${estimateValue}`}
             onClick={() => setEstimateValue(estimateValue)}
-            colorScheme="blue"
-            isDisabled={!!estimatedValue && estimatedValue !== estimateValue}
+            disabled={!!estimatedValue && estimatedValue !== estimateValue}
           >
             {estimateValue}
           </Button>
         ))}
       </div>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Create your account</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <FormControl>
-              <FormLabel>Name</FormLabel>
-              <Input
-                value={userName}
-                onChange={handleChange}
-                placeholder="Name"
-              />
-            </FormControl>
-          </ModalBody>
+      <Modal title="Enter username" opened={opened} onClose={close} centered>
+        <TextInput
+          label="Username"
+          placeholder="Username"
+          value={userName}
+          onChange={handleChange}
+        />
 
-          <ModalFooter>
-            <Button onClick={() => saveUser()} colorScheme="blue" mr={3}>
-              Save
-            </Button>
-            <Button onClick={onClose}>Cancel</Button>
-          </ModalFooter>
-        </ModalContent>
+        <Button onClick={saveUser} mt={16}>
+          Save
+        </Button>
       </Modal>
     </div>
   )

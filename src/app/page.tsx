@@ -5,7 +5,7 @@ import styles from './page.module.css'
 import { database } from '../firebase/config'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Button, Spinner } from '@chakra-ui/react'
+import { Button, Loader } from '@mantine/core'
 
 const dbInstance = collection(database, 'rooms')
 
@@ -35,20 +35,12 @@ export default function Home() {
   }
 
   if (isLoading) {
-    return (
-      <Spinner
-        thickness="4px"
-        speed="0.65s"
-        emptyColor="gray.200"
-        color="blue.500"
-        size="xl"
-      />
-    )
+    return <Loader speed="0.65s" color="blue" size="xl" />
   }
 
   return (
     <main className={styles.main}>
-      <Button onClick={createNewRoom} colorScheme="blue" disabled={isLoading}>
+      <Button onClick={createNewRoom} disabled={isLoading}>
         Create room
       </Button>
     </main>

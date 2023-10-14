@@ -21,6 +21,7 @@ import {
   where,
   getDocs,
   setDoc,
+  updateDoc,
 } from 'firebase/firestore'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -88,8 +89,8 @@ export default function Room({ params }: IRoomPageParams) {
       // console.log({ querySnapshot })
       const data = querySnapshot.data()
 
-      console.log(data?.display)
-      setDisplayData(data?.display)
+      console.log('ovo change', data?.displayEstimates)
+      setDisplayData(data?.displayEstimates)
       // querySnapshot.forEach((doc) => {
       //   console.log('Users data: ', doc.data())
       //   // newUsers.push({ id: doc.id, userName: doc.data().userName })
@@ -194,9 +195,6 @@ export default function Room({ params }: IRoomPageParams) {
   }, [])
 
   const joinRoom = async (cookieUser: IUser) => {
-    // let collectionRef = collection(dbInstance, params.id, 'users')
-    // await setDoc(doc(db, "cities", "new-city-id"), data);
-
     const response = await setDoc(
       doc(database, 'rooms', params.id, 'users', cookieUser.id),
       {
@@ -302,6 +300,31 @@ export default function Room({ params }: IRoomPageParams) {
     })
   }
 
+  const displayEstimates = async () => {
+    const roomsRef = doc(dbInstance, params.id)
+
+    const res = await updateDoc(roomsRef, {
+      displayEstimates: true,
+    })
+
+    console.log('displayEstimates', { res })
+    // const cityRef = dbInstance.collection('cities').doc('DC');
+
+    // Set the 'capital' field of the city
+  }
+  const hideEstimates = async () => {
+    const roomsRef = doc(dbInstance, params.id)
+
+    const res = await updateDoc(roomsRef, {
+      displayEstimates: false,
+    })
+
+    console.log('displayEstimates', { res })
+    // const cityRef = dbInstance.collection('cities').doc('DC');
+
+    // Set the 'capital' field of the city
+  }
+
   return (
     <div>
       <h1>
@@ -320,6 +343,8 @@ export default function Room({ params }: IRoomPageParams) {
       <Button onClick={() => removeFromRoom(currentUser)}>
         Remove from room
       </Button>
+      <Button onClick={displayEstimates}>Display estimates</Button>
+      <Button onClick={hideEstimates}>Hide estimates</Button>
       {displayData && <div>Pokazi svima</div>}
       <div>
         {[2, 4, 6, 8].map((estimateValue) => (

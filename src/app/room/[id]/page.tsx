@@ -21,7 +21,13 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore'
-import { ChangeEvent, useCallback, useEffect, useState } from 'react'
+import {
+  ChangeEvent,
+  KeyboardEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import { useRouter } from 'next/navigation'
 import { useDisclosure } from '@mantine/hooks'
 import {
@@ -32,10 +38,11 @@ import {
   Modal,
   TextInput,
 } from '@mantine/core'
-import { PokerCard } from '@/app/components/PokerCard'
+import { PokerCard } from '@/app/components/PokerCard/PokerCard'
+import { UserCard } from '@/app/components/UserCard/UserCard'
 const dbInstance = collection(database, 'rooms')
 
-interface IUser {
+export interface IUser {
   id: string
   username: string
   estimate?: number
@@ -192,6 +199,7 @@ export default function Room({ params }: IRoomPageParams) {
       id: response.id,
     })
     initListeners()
+
     close()
   }
 
@@ -279,37 +287,15 @@ export default function Room({ params }: IRoomPageParams) {
 
     return avg
   }
-
+  const handleKeyDown = (event: KeyboardEvent) => {
+    console.log('da')
+    if (event.key === 'Enter') {
+      console.log('do validate')
+      saveUser()
+    }
+  }
   return (
-    <Container>
-      <h1>
-        You are: <b>{!!currentUser?.username ? currentUser?.username : '/'}</b>
-      </h1>
-      <div>
-        <span>Other users in room:</span>
-        {users.length > 0 &&
-          users
-            .filter((user) => user.id !== currentUser?.id)
-            .map((user) => (
-              <p key={user.id}>
-                {user.username}
-                {displayData && user?.estimate}
-              </p>
-            ))}
-      </div>
-
-      <Button onClick={() => removeFromRoom(currentUser)}>
-        Remove from room
-      </Button>
-      <Button onClick={() => setDisplayEstimates(!displayData)}>
-        {displayData ? 'Hide estimates' : 'Display estimates'}
-      </Button>
-      <Button color="red" onClick={resetEstimates}>
-        Reset estimates
-      </Button>
-      {displayData && <div>Average: {getAverage()}</div>}
-
-      {/* <SimpleGrid spacing="md" cols={{ md: 6, base: 4 }}> */}
+    <Container py="md">
       <Group gap={8}>
         {[1, 2, 3, 4, 5, 6, 8, 12, 14, 16, 20, 24].map((estimateValue) => (
           <PokerCard
@@ -320,7 +306,29 @@ export default function Room({ params }: IRoomPageParams) {
           />
         ))}
       </Group>
-      {/* </SimpleGrid> */}
+      <Group gap={8} mt={32}>
+        {users.length > 0 &&
+          users.map((user) => (
+            <UserCard
+              key={user.id}
+              user={user}
+              displayEstimate={displayData}
+              removeFromRoom={removeFromRoom}
+            />
+          ))}
+      </Group>
+
+      {displayData && <div>Average: {getAverage()}</div>}
+
+      <Group gap={8} mt={32}>
+        <Button color="red" onClick={resetEstimates}>
+          Reset estimates
+        </Button>
+
+        <Button onClick={() => setDisplayEstimates(!displayData)}>
+          {displayData ? 'Hide estimates' : 'Display estimates'}
+        </Button>
+      </Group>
 
       <Modal title="Enter username" opened={opened} onClose={close} centered>
         <TextInput
@@ -328,9 +336,10 @@ export default function Room({ params }: IRoomPageParams) {
           placeholder="username"
           value={username}
           onChange={handleChange}
+          onKeyDown={handleKeyDown}
         />
 
-        <Button onClick={saveUser} mt={16}>
+        <Button disabled={!username} onClick={saveUser} mt={16}>
           Save
         </Button>
       </Modal>

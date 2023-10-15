@@ -5,7 +5,7 @@ import styles from './page.module.css'
 import { database } from '../firebase/config'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Button, Loader, LoadingOverlay } from '@mantine/core'
+import { Button, LoadingOverlay } from '@mantine/core'
 
 const dbInstance = collection(database, 'rooms')
 

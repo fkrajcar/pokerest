@@ -18,7 +18,6 @@ import {
   addDoc,
   deleteDoc,
   query,
-  where,
   getDocs,
   setDoc,
   updateDoc,
@@ -31,7 +30,7 @@ const dbInstance = collection(database, 'rooms')
 
 interface IUser {
   id: string
-  userName: string
+  username: string
   estimate?: number
 }
 
@@ -39,9 +38,9 @@ export default function Room({ params }: IRoomPageParams) {
   const [estimatedValue, setEstimatedValue] = useState<number | null>(null)
   const [estimateId, setEstimateId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [currentUser, setUser] = useState<IUser | null>(null)
+  const [currentUser, setCurrentUser] = useState<IUser | null>(null)
   const [users, setUsers] = useState<IUser[]>([])
-  const [userName, setUsername] = useState('')
+  const [username, setUsername] = useState('')
   const [displayData, setDisplayData] = useState<boolean>(false)
   const [opened, { open, close }] = useDisclosure(false)
 
@@ -69,71 +68,58 @@ export default function Room({ params }: IRoomPageParams) {
   }
 
   const displayDataChangeListener = () => {
-    // const collectionRef = firebase.firestore().collection('myCollection');
-    // let collectionRef = collection(dbInstance, params.id)
     const docRef = doc(database, 'rooms', params.id)
-
-    // Create a query to listen for changes in the collection
-    // const query = collectionRef.where('fieldName', '!=', null)
-
-    //   docRef.on('value', (snapshot) => {
-    //   const fieldValue = snapshot.val();
-    //   console.log('Field Value Changed:', fieldValue);
-
-    //   // Handle the changed value here, such as updating your component's state
-    // });
 
     const q = query(collection(docRef, 'display'))
     console.log({ q })
     onSnapshot(docRef, (querySnapshot) => {
-      // console.log({ querySnapshot })
       const data = querySnapshot.data()
 
       console.log('ovo change', data?.displayEstimates)
       setDisplayData(data?.displayEstimates)
-      // querySnapshot.forEach((doc) => {
-      //   console.log('Users data: ', doc.data())
-      //   // newUsers.push({ id: doc.id, userName: doc.data().userName })
-      // })
-      // console.log('Current cities in CA: ', cities.join(', '))
     })
-    // const unsub = onSnapshot(
-    //   doc(database, 'rooms', 'SF'),
-    //   { includeMetadataChanges: true },
-    //   (doc) => {
-    //     // ...
-    //   }
-    // )
-
-    // const unsubscribe = q.onSnapshot((querySnapshot) => {
-    //   // Loop through the documents in the query result
-    //   querySnapshot.forEach((doc) => {
-    //     // Access the specific field 'fieldName' in each document
-    //     const fieldData = doc.get('fieldName')
-
-    //     // Update your component state with the field value
-    //     setFieldValue(fieldData)
-    //   })
-    // })
   }
 
   const userChangeSnapshotListener = () => {
     let collectionRef = collection(dbInstance, params.id, 'users')
+    const cookie = getCookie('pokerestUserCookie')
+    let cookieUser: IUser
+
+    if (cookie) {
+      cookieUser = JSON.parse(cookie)
+    }
 
     onSnapshot(collectionRef, (querySnapshot) => {
       const newUsers: IUser[] = []
       console.log('onSnapshot')
       querySnapshot.forEach((doc) => {
         const userData = doc.data()
-        console.log('Users data: ', doc.data(), userData)
-        newUsers.push({ id: doc.id, userName: userData.userName })
+        console.log('User ID: ', doc.id, ' Users data: ', userData)
+        newUsers.push({
+          id: doc.id,
+          username: userData.username,
+          estimate: userData.estimate,
+        })
+
+        if (doc.id === cookieUser?.id) {
+          console.log('nasao', { userData })
+          setCurrentUser({
+            id: doc.id,
+            username: userData.username,
+            estimate: userData.estimate,
+          })
+          // cookieUser = {
+          //   id: doc.id,
+          //   ...userData,
+          // }
+        }
       })
 
       if (newUsers.length <= 0) {
         open()
       }
       console.log({ newUsers })
-      setUsers([...newUsers])
+      setUsers(newUsers)
     })
   }
 
@@ -141,27 +127,9 @@ export default function Room({ params }: IRoomPageParams) {
     let collectionRef = collection(dbInstance, params.id, 'estimates')
 
     onSnapshot(collectionRef, (querySnapshot) => {
-      const usersData = [...users]
       querySnapshot.forEach((doc) => {
         const docData = doc.data()
-        console.log('Estimates data: ', docData)
-        console.log({ usersData })
-
-        const newData = usersData.map((userData) => {
-          if (docData.userId === userData.id) {
-            console.log('dadada')
-
-            return {
-              ...userData,
-              estimate: docData.estimate,
-            }
-          }
-
-          return userData
-        })
-
-        console.log({ newData })
-        // usersData.find()
+        console.log('Estimates data: ', docData, { users })
       })
     })
   }
@@ -173,17 +141,16 @@ export default function Room({ params }: IRoomPageParams) {
       open()
     } else {
       const cookieUser: IUser = JSON.parse(cookie)
-      console.log(cookieUser.userName)
-      if (!cookieUser.userName || !cookieUser.id) {
+      console.log(cookieUser.username)
+      if (!cookieUser.username || !cookieUser.id) {
         open()
       } else {
-        if (cookieUser.id && cookieUser.id) {
+        if (cookieUser.username && cookieUser.id) {
           joinRoom(cookieUser)
-          // saveUser(cookieUser.id)
         }
         // TODO: user postoji u cookie, ali nije dodan u room na firebase
-        setUser({ userName: cookieUser.userName, id: cookieUser.id })
-        getData(cookieUser.id)
+        setCurrentUser({ username: cookieUser.username, id: cookieUser.id })
+        // getData(cookieUser.id)
       }
     }
     getNotes()
@@ -198,13 +165,10 @@ export default function Room({ params }: IRoomPageParams) {
     const response = await setDoc(
       doc(database, 'rooms', params.id, 'users', cookieUser.id),
       {
-        userName: cookieUser.userName,
-      }
+        username: cookieUser.username,
+      },
+      { merge: true }
     )
-    // const response = await setDoc(collectionRef, {
-    //   userName: cookieUser.userName,
-    //   id: cookieUser.id,
-    // })
 
     console.log('joinRoom', cookieUser.id, { response })
   }
@@ -218,25 +182,11 @@ export default function Room({ params }: IRoomPageParams) {
     await deleteDoc(doc(database, 'rooms', params.id, 'users', cookieUser.id))
   }
 
-  const getData = async (userId: string) => {
-    const q = query(
-      collection(dbInstance, params.id, 'estimates'),
-      where('userId', '==', userId)
-    )
-
-    const querySnapshot = await getDocs(q)
-
-    querySnapshot.forEach((doc) => {
-      setEstimatedValue(doc.data().estimate)
-      setEstimateId(doc.id)
-    })
-  }
-
   const saveUser = async () => {
     let collectionRef = collection(dbInstance, params.id, 'users')
 
     const response = await addDoc(collectionRef, {
-      userName: userName,
+      username: username,
     })
 
     console.log({ response })
@@ -244,13 +194,13 @@ export default function Room({ params }: IRoomPageParams) {
     setCookie(
       'pokerestUserCookie',
       JSON.stringify({
-        userName: userName,
+        username: username,
         id: response.id,
       })
     )
 
-    setUser({
-      userName: userName,
+    setCurrentUser({
+      username: username,
       id: response.id,
     })
     close()
@@ -260,29 +210,31 @@ export default function Room({ params }: IRoomPageParams) {
     return <Loader speed="0.65s" color="blue" size="xl" />
   }
 
-  const setEstimateValue = async (value: number) => {
-    console.log(value)
-
-    let collectionRef = collection(dbInstance, params.id, 'estimates')
-
-    if (estimatedValue && estimateId) {
-      const response = await deleteDoc(
-        doc(dbInstance, params.id, 'estimates', estimateId)
-      )
-      console.log('delete:', { response })
-      return setEstimatedValue(null)
+  const setEstimateOnUser = async (value: number) => {
+    if (!currentUser?.id) {
+      return console.error('no user id')
     }
+    if (currentUser?.estimate) {
+      console.log('ima estimate')
+      const response = await setDoc(
+        doc(database, 'rooms', params.id, 'users', currentUser.id),
+        {
+          estimate: null,
+        },
+        { merge: true }
+      )
 
-    if (currentUser?.id) {
-      const response = await addDoc(collectionRef, {
-        estimate: value,
-        userId: currentUser.id,
-      })
       console.log({ response })
-      setEstimatedValue(value)
-      setEstimateId(response.id)
     } else {
-      console.error('error')
+      const response = await setDoc(
+        doc(database, 'rooms', params.id, 'users', currentUser.id),
+        {
+          estimate: value,
+        },
+        { merge: true }
+      )
+
+      console.log({ response })
     }
   }
 
@@ -325,19 +277,43 @@ export default function Room({ params }: IRoomPageParams) {
     // Set the 'capital' field of the city
   }
 
+  const resetEstimates = async () => {
+    console.log('resetEstimates')
+
+    let collectionRef = collection(dbInstance, params.id, 'users')
+    const querySnapshot = await getDocs(collectionRef)
+    await Promise.all(
+      querySnapshot.docs.map((document) => {
+        return setDoc(
+          doc(database, 'rooms', params.id, 'users', document.id),
+          {
+            estimate: null,
+          },
+          { merge: true }
+        )
+      })
+    )
+  }
+
   return (
     <div>
       <h1>
-        You are: <b>{!!currentUser?.userName ? currentUser?.userName : '/'}</b>
+        You are: <b>{!!currentUser?.username ? currentUser?.username : '/'}</b>
       </h1>
       <div>
         <span>Other users in room:</span>
         {users.length > 0 &&
           users
             .filter((user) => user.id !== currentUser?.id)
-            .map((user) => <p key={user.id}>{user.userName}</p>)}
+            .map((user) => (
+              <p key={user.id}>
+                {user.username}
+                {displayData && user?.estimate}
+              </p>
+            ))}
       </div>
-      {!!estimatedValue && <span>{estimatedValue}</span>}
+      {/* {!!estimatedValue && <span>{estimatedValue}</span>} */}
+      {currentUser?.estimate && <span>{currentUser?.estimate}</span>}
 
       <Button onClick={() => getValues()}>Get values</Button>
       <Button onClick={() => removeFromRoom(currentUser)}>
@@ -345,13 +321,18 @@ export default function Room({ params }: IRoomPageParams) {
       </Button>
       <Button onClick={displayEstimates}>Display estimates</Button>
       <Button onClick={hideEstimates}>Hide estimates</Button>
+      <Button color="red" onClick={resetEstimates}>
+        Reset estimates
+      </Button>
       {displayData && <div>Pokazi svima</div>}
       <div>
         {[2, 4, 6, 8].map((estimateValue) => (
           <Button
             key={`estimate-Button-${estimateValue}`}
-            onClick={() => setEstimateValue(estimateValue)}
-            disabled={!!estimatedValue && estimatedValue !== estimateValue}
+            onClick={() => setEstimateOnUser(estimateValue)}
+            disabled={
+              !!currentUser?.estimate && currentUser?.estimate !== estimateValue
+            }
           >
             {estimateValue}
           </Button>
@@ -359,9 +340,9 @@ export default function Room({ params }: IRoomPageParams) {
       </div>
       <Modal title="Enter username" opened={opened} onClose={close} centered>
         <TextInput
-          label="Username"
-          placeholder="Username"
-          value={userName}
+          label="username"
+          placeholder="username"
+          value={username}
           onChange={handleChange}
         />
 

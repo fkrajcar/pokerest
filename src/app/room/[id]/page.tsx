@@ -296,7 +296,7 @@ export default function Room({ params }: IRoomPageParams) {
 
   return (
     <Container py="md">
-      <Group gap={8}>
+      <Group gap={8} justify="center">
         {[1, 2, 3, 4, 5, 6, 8, 12, 14, 16, 20, 24].map((estimateValue) => (
           <PokerCard
             value={estimateValue}
@@ -307,7 +307,8 @@ export default function Room({ params }: IRoomPageParams) {
           />
         ))}
       </Group>
-      <Group gap={8} mt={64}>
+
+      <Group gap={16} mt={64} justify="center">
         {users.length > 0 &&
           users.map((user) => (
             <UserCard
@@ -319,11 +320,11 @@ export default function Room({ params }: IRoomPageParams) {
           ))}
       </Group>
 
-      <Box mt={64}>
+      <Box mt={80}>
         <EstimateCard value={getAverage()} displayData={displayData} />
       </Box>
 
-      <Group gap={8} mt={32}>
+      <Group gap={16} mt={48} justify="center">
         <Button color="red" onClick={resetEstimates}>
           Reset estimates
         </Button>

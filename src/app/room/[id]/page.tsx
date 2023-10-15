@@ -324,10 +324,17 @@ export default function Room({ params }: IRoomPageParams) {
         </Button>
       </Group>
 
-      <Modal title="Enter username" opened={opened} onClose={close} centered>
+      <Modal
+        title="Enter username"
+        opened={opened}
+        onClose={close}
+        centered
+        withCloseButton={false}
+        closeOnClickOutside={false}
+        closeOnEscape={false}
+      >
         <TextInput
-          label="username"
-          placeholder="username"
+          placeholder="Username"
           value={username}
           onChange={handleChange}
           onKeyDown={handleKeyDown}

@@ -24,7 +24,15 @@ import {
 import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDisclosure } from '@mantine/hooks'
-import { Button, Loader, Modal, TextInput } from '@mantine/core'
+import {
+  Button,
+  Container,
+  Group,
+  LoadingOverlay,
+  Modal,
+  TextInput,
+} from '@mantine/core'
+import { PokerCard } from '@/app/components/PokerCard'
 const dbInstance = collection(database, 'rooms')
 
 interface IUser {
@@ -188,10 +196,17 @@ export default function Room({ params }: IRoomPageParams) {
   }
 
   if (isLoading) {
-    return <Loader speed="0.65s" color="blue" size="xl" />
+    return (
+      <LoadingOverlay
+        visible={true}
+        zIndex={1000}
+        overlayProps={{ radius: 'sm', blur: 2 }}
+      />
+    )
   }
 
   const setEstimateOnUser = async (value: number) => {
+    console.log('setEstimate', value)
     if (!currentUser?.id) {
       return console.error('no user id')
     }
@@ -266,7 +281,7 @@ export default function Room({ params }: IRoomPageParams) {
   }
 
   return (
-    <div>
+    <Container>
       <h1>
         You are: <b>{!!currentUser?.username ? currentUser?.username : '/'}</b>
       </h1>
@@ -293,19 +308,20 @@ export default function Room({ params }: IRoomPageParams) {
         Reset estimates
       </Button>
       {displayData && <div>Average: {getAverage()}</div>}
-      <div>
-        {[2, 4, 6, 8].map((estimateValue) => (
-          <Button
-            key={`estimate-Button-${estimateValue}`}
-            onClick={() => setEstimateOnUser(estimateValue)}
-            disabled={
-              !!currentUser?.estimate && currentUser?.estimate !== estimateValue
-            }
-          >
-            {estimateValue}
-          </Button>
+
+      {/* <SimpleGrid spacing="md" cols={{ md: 6, base: 4 }}> */}
+      <Group gap={8}>
+        {[1, 2, 3, 4, 5, 6, 8, 12, 14, 16, 20, 24].map((estimateValue) => (
+          <PokerCard
+            value={estimateValue}
+            key={estimateValue}
+            selectedEstimate={currentUser?.estimate}
+            setEstimateOnUser={setEstimateOnUser}
+          />
         ))}
-      </div>
+      </Group>
+      {/* </SimpleGrid> */}
+
       <Modal title="Enter username" opened={opened} onClose={close} centered>
         <TextInput
           label="username"
@@ -318,6 +334,6 @@ export default function Room({ params }: IRoomPageParams) {
           Save
         </Button>
       </Modal>
-    </div>
+    </Container>
   )
 }

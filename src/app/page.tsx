@@ -5,7 +5,7 @@ import styles from './page.module.css'
 import { database } from '../firebase/config'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Button, Loader } from '@mantine/core'
+import { Button, Loader, LoadingOverlay } from '@mantine/core'
 
 const dbInstance = collection(database, 'rooms')
 
@@ -35,7 +35,13 @@ export default function Home() {
   }
 
   if (isLoading) {
-    return <Loader speed="0.65s" color="blue" size="xl" />
+    return (
+      <LoadingOverlay
+        visible={true}
+        zIndex={1000}
+        overlayProps={{ radius: 'sm', blur: 2 }}
+      />
+    )
   }
 
   return (

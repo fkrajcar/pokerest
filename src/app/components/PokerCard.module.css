@@ -1,0 +1,21 @@
+.card {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 100ms ease, box-shadow 100ms ease;
+  padding: 16px;
+  min-width: 54px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.card:hover {
+  box-shadow: var(--mantine-shadow-md);
+  transform: scale(1.02);
+}
+
+.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}

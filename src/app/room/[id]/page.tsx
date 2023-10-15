@@ -17,7 +17,6 @@ import {
   onSnapshot,
   addDoc,
   deleteDoc,
-  query,
   getDocs,
   setDoc,
   updateDoc,
@@ -47,7 +46,7 @@ export default function Room({ params }: IRoomPageParams) {
   const handleChange = (event: ChangeEvent<HTMLInputElement>) =>
     setUsername(event?.target?.value)
 
-  const init = async () => {
+  const checkRoom = async () => {
     const docRef = doc(database, 'rooms', params.id)
 
     const docSnap = await getDoc(docRef)
@@ -59,7 +58,9 @@ export default function Room({ params }: IRoomPageParams) {
 
       return
     }
+  }
 
+  const initListeners = () => {
     userChangeSnapshotListener()
     displayDataChangeListener()
   }
@@ -67,17 +68,14 @@ export default function Room({ params }: IRoomPageParams) {
   const displayDataChangeListener = () => {
     const docRef = doc(database, 'rooms', params.id)
 
-    const q = query(collection(docRef, 'display'))
-    console.log({ q })
     onSnapshot(docRef, (querySnapshot) => {
       const data = querySnapshot.data()
 
-      console.log('ovo change', data?.displayEstimates)
       setDisplayData(data?.displayEstimates)
     })
   }
 
-  const userChangeSnapshotListener = () => {
+  const userChangeSnapshotListener = useCallback(() => {
     let collectionRef = collection(dbInstance, params.id, 'users')
     const cookie = getCookie('pokerestUserCookie')
     let cookieUser: IUser
@@ -88,10 +86,8 @@ export default function Room({ params }: IRoomPageParams) {
 
     onSnapshot(collectionRef, (querySnapshot) => {
       const newUsers: IUser[] = []
-      console.log('onSnapshot')
       querySnapshot.forEach((doc) => {
         const userData = doc.data()
-        console.log('User ID: ', doc.id, ' Users data: ', userData)
         newUsers.push({
           id: doc.id,
           username: userData.username,
@@ -99,39 +95,33 @@ export default function Room({ params }: IRoomPageParams) {
         })
 
         if (doc.id === cookieUser?.id || currentUser?.id === doc.id) {
-          console.log('nasao', { userData })
           setCurrentUser({
             id: doc.id,
             username: userData.username,
             estimate: userData.estimate,
           })
-          // cookieUser = {
-          //   id: doc.id,
-          //   ...userData,
-          // }
         }
       })
 
       if (newUsers.length <= 0) {
         open()
       }
-      console.log({ newUsers })
       setUsers(newUsers)
     })
-  }
+  }, [currentUser, open, params.id])
+
   const joinRoom = useCallback(
     async (cookieUser: IUser) => {
-      const response = await setDoc(
+      await setDoc(
         doc(database, 'rooms', params.id, 'users', cookieUser.id),
         {
           username: cookieUser.username,
         },
         { merge: true }
       )
-
-      console.log('joinRoom', cookieUser.id, { response })
+      initListeners()
     },
-    [params?.id]
+    [params]
   )
 
   const removeFromRoom = useCallback(
@@ -148,24 +138,25 @@ export default function Room({ params }: IRoomPageParams) {
 
   useEffect(() => {
     setIsLoading(true)
+
+    checkRoom()
+
     const cookie = getCookie('pokerestUserCookie')
+
     if (!cookie) {
       open()
     } else {
       const cookieUser: IUser = JSON.parse(cookie)
-      console.log(cookieUser.username)
       if (!cookieUser.username || !cookieUser.id) {
         open()
       } else {
+        setCurrentUser({ username: cookieUser.username, id: cookieUser.id })
+
         if (cookieUser.username && cookieUser.id) {
           joinRoom(cookieUser)
         }
-        // TODO: user postoji u cookie, ali nije dodan u room na firebase
-        setCurrentUser({ username: cookieUser.username, id: cookieUser.id })
-        // getData(cookieUser.id)
       }
     }
-    init()
     setIsLoading(false)
 
     return () => {
@@ -180,8 +171,6 @@ export default function Room({ params }: IRoomPageParams) {
       username: username,
     })
 
-    console.log({ response })
-
     setCookie(
       'pokerestUserCookie',
       JSON.stringify({
@@ -194,6 +183,7 @@ export default function Room({ params }: IRoomPageParams) {
       username: username,
       id: response.id,
     })
+    initListeners()
     close()
   }
 
@@ -205,27 +195,23 @@ export default function Room({ params }: IRoomPageParams) {
     if (!currentUser?.id) {
       return console.error('no user id')
     }
+
     if (currentUser?.estimate) {
-      console.log('ima estimate')
-      const response = await setDoc(
+      await setDoc(
         doc(database, 'rooms', params.id, 'users', currentUser.id),
         {
           estimate: null,
         },
         { merge: true }
       )
-
-      console.log({ response })
     } else {
-      const response = await setDoc(
+      await setDoc(
         doc(database, 'rooms', params.id, 'users', currentUser.id),
         {
           estimate: value,
         },
         { merge: true }
       )
-
-      console.log({ response })
     }
   }
 
@@ -240,8 +226,6 @@ export default function Room({ params }: IRoomPageParams) {
   }
 
   const resetEstimates = async () => {
-    console.log('resetEstimates')
-
     let collectionRef = collection(dbInstance, params.id, 'users')
     const querySnapshot = await getDocs(collectionRef)
     await Promise.all(

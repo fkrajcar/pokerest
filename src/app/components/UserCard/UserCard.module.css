@@ -6,11 +6,6 @@
   align-items: center;
 }
 
-.section {
-  border-bottom: rem(1px) solid
-    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
-}
-
 .label {
   text-transform: uppercase;
   font-size: var(--mantine-font-size-xs);

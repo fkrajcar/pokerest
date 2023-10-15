@@ -9,6 +9,7 @@ export interface IPokerCardParams {
   setEstimateOnUser?: (estimate: number) => void
   displayOnly?: boolean
   displayValue?: boolean
+  disableAction?: boolean
 }
 
 export const PokerCard = ({
@@ -17,6 +18,7 @@ export const PokerCard = ({
   selectedEstimate,
   displayOnly = false,
   displayValue = true,
+  disableAction = false,
 }: IPokerCardParams) => {
   const onClickAction = () => {
     if (!setEstimateOnUser || !value) {
@@ -25,6 +27,7 @@ export const PokerCard = ({
 
     setEstimateOnUser(value)
   }
+
   return (
     <Paper
       withBorder
@@ -35,7 +38,9 @@ export const PokerCard = ({
       className={clsx(
         classes.card,
         !displayOnly && classes.action,
-        selectedEstimate && selectedEstimate !== value && classes.disabled,
+        ((selectedEstimate && selectedEstimate !== value) || disableAction) &&
+          classes.disabled,
+        selectedEstimate && selectedEstimate === value && classes.selected,
         !!value && displayOnly && classes.choosen
       )}
     >

@@ -144,8 +144,7 @@ export default function Room({ params }: IRoomPageParams) {
   const removeFromRoom = useCallback(
     async (cookieUser: IUser | null) => {
       if (!cookieUser?.id) {
-        console.error('nema userId, removeFromRoom')
-        return
+        return console.error('userId is not set!')
       }
 
       await deleteDoc(doc(database, 'rooms', params.id, 'users', cookieUser.id))
@@ -216,9 +215,8 @@ export default function Room({ params }: IRoomPageParams) {
   }
 
   const setEstimateOnUser = async (value: number) => {
-    console.log('setEstimate', value)
     if (!currentUser?.id) {
-      return console.error('no user id')
+      return console.error('userId is not set!')
     }
 
     if (currentUser?.estimate) {
@@ -305,6 +303,7 @@ export default function Room({ params }: IRoomPageParams) {
             key={estimateValue}
             selectedEstimate={currentUser?.estimate}
             setEstimateOnUser={setEstimateOnUser}
+            disableAction={displayData}
           />
         ))}
       </Group>

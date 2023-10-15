@@ -31,6 +31,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { useDisclosure } from '@mantine/hooks'
 import {
+  Box,
   Button,
   Container,
   Group,
@@ -40,6 +41,7 @@ import {
 } from '@mantine/core'
 import { PokerCard } from '@/app/components/PokerCard/PokerCard'
 import { UserCard } from '@/app/components/UserCard/UserCard'
+import { EstimateCard } from '@/app/components/EstimateCard/EstimateCard'
 const dbInstance = collection(database, 'rooms')
 
 export interface IUser {
@@ -287,13 +289,13 @@ export default function Room({ params }: IRoomPageParams) {
 
     return avg
   }
+
   const handleKeyDown = (event: KeyboardEvent) => {
-    console.log('da')
     if (event.key === 'Enter') {
-      console.log('do validate')
       saveUser()
     }
   }
+
   return (
     <Container py="md">
       <Group gap={8}>
@@ -306,7 +308,7 @@ export default function Room({ params }: IRoomPageParams) {
           />
         ))}
       </Group>
-      <Group gap={8} mt={32}>
+      <Group gap={8} mt={64}>
         {users.length > 0 &&
           users.map((user) => (
             <UserCard
@@ -318,7 +320,9 @@ export default function Room({ params }: IRoomPageParams) {
           ))}
       </Group>
 
-      {displayData && <div>Average: {getAverage()}</div>}
+      <Box mt={64}>
+        <EstimateCard value={getAverage()} displayData={displayData} />
+      </Box>
 
       <Group gap={8} mt={32}>
         <Button color="red" onClick={resetEstimates}>

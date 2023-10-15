@@ -263,13 +263,20 @@ export default function Room({ params }: IRoomPageParams) {
     const estimates = users
       .map((user) => user.estimate)
       .filter((estimate) => !!estimate)
-    console.log(estimates)
+
     var sum = estimates.reduce((accumulator, currentValue) => {
+      if (!accumulator || !currentValue) {
+        return 0
+      }
+
       return accumulator + currentValue
     }, 0)
 
+    if (!sum) {
+      return 0
+    }
+
     const avg = sum / estimates?.length
-    console.log(avg)
 
     return avg
   }

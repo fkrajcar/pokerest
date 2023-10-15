@@ -98,7 +98,7 @@ export default function Room({ params }: IRoomPageParams) {
           estimate: userData.estimate,
         })
 
-        if (doc.id === cookieUser?.id) {
+        if (doc.id === cookieUser?.id || currentUser?.id === doc.id) {
           console.log('nasao', { userData })
           setCurrentUser({
             id: doc.id,

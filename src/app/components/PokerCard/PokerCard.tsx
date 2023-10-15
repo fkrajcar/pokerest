@@ -1,4 +1,4 @@
-import { Paper } from '@mantine/core'
+import { Paper, Text } from '@mantine/core'
 import classes from './PokerCard.module.css'
 import clsx from 'clsx'
 
@@ -43,7 +43,7 @@ export const PokerCard = ({
         !!value && displayOnly && classes.choosen
       )}
     >
-      {displayValue && value}
+      <Text>{displayValue && value}</Text>
     </Paper>
   )
 }

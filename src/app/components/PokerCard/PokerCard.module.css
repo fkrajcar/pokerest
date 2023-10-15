@@ -26,10 +26,10 @@
 }
 
 .selected {
-  border-color: var(--mantine-color-blue-2);
+  border-color: var(--mantine-color-blue-5);
   pointer-events: none;
 }
 
 .choosen {
-  background-color: var(--mantine-color-blue-2);
+  background-color: var(--mantine-color-blue-5);
 }

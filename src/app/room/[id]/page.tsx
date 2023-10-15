@@ -265,7 +265,7 @@ export default function Room({ params }: IRoomPageParams) {
       .filter((estimate) => !!estimate)
 
     var sum = estimates.reduce((accumulator, currentValue) => {
-      if (!accumulator || !currentValue) {
+      if (accumulator === undefined || currentValue === undefined) {
         return 0
       }
 

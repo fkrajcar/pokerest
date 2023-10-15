@@ -1,11 +1,10 @@
 'use client'
 
 import { addDoc, collection } from 'firebase/firestore'
-import styles from './page.module.css'
 import { database } from '../firebase/config'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Button, LoadingOverlay } from '@mantine/core'
+import { Button, Container, Group, LoadingOverlay } from '@mantine/core'
 
 const dbInstance = collection(database, 'rooms')
 
@@ -24,6 +23,7 @@ export default function Home() {
 
     try {
       const response = await saveRoom()
+
       if (response.id) {
         await router.push(`/room/${response.id}`)
       }
@@ -45,10 +45,12 @@ export default function Home() {
   }
 
   return (
-    <main className={styles.main}>
-      <Button onClick={createNewRoom} disabled={isLoading}>
-        Create room
-      </Button>
-    </main>
+    <Container py="md">
+      <Group justify="center">
+        <Button onClick={createNewRoom} disabled={isLoading}>
+          Create new room
+        </Button>
+      </Group>
+    </Container>
   )
 }

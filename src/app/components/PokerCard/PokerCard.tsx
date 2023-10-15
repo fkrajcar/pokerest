@@ -38,8 +38,7 @@ export const PokerCard = ({
       className={clsx(
         classes.card,
         !displayOnly && classes.action,
-        ((selectedEstimate && selectedEstimate !== value) || disableAction) &&
-          classes.disabled,
+        disableAction && classes.disabled,
         selectedEstimate && selectedEstimate === value && classes.selected,
         !!value && displayOnly && classes.choosen
       )}

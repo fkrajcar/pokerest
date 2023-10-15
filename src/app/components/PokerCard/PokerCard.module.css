@@ -27,6 +27,7 @@
 
 .selected {
   border-color: var(--mantine-color-blue-2);
+  pointer-events: none;
 }
 
 .choosen {

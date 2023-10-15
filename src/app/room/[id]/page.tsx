@@ -219,23 +219,13 @@ export default function Room({ params }: IRoomPageParams) {
       return console.error('userId is not set!')
     }
 
-    if (currentUser?.estimate) {
-      await setDoc(
-        doc(database, 'rooms', params.id, 'users', currentUser.id),
-        {
-          estimate: null,
-        },
-        { merge: true }
-      )
-    } else {
-      await setDoc(
-        doc(database, 'rooms', params.id, 'users', currentUser.id),
-        {
-          estimate: value,
-        },
-        { merge: true }
-      )
-    }
+    await setDoc(
+      doc(database, 'rooms', params.id, 'users', currentUser.id),
+      {
+        estimate: value,
+      },
+      { merge: true }
+    )
   }
 
   const setDisplayEstimates = async (display: boolean) => {

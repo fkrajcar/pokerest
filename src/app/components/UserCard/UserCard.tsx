@@ -27,7 +27,6 @@ export const UserCard = ({
             aria-label="ActionIcon with size as a number"
             onClick={() => removeFromRoom(user)}
             className={classes.closeButton}
-            radius={0}
           >
             <IconX style={{ width: rem(16), height: rem(16) }} />
           </ActionIcon>

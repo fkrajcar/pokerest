@@ -16,4 +16,6 @@
   position: absolute;
   top: 0;
   right: 0;
+  border-radius: 0;
+  border-bottom-left-radius: 8px;
 }

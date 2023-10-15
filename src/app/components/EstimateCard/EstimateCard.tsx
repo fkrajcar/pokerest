@@ -11,7 +11,7 @@ export const EstimateCard = ({ value, displayData }: IEstimateCardProps) => {
       <Badge
         size="xl"
         className={classes.icon}
-        style={{ fontSize: 24, minWidth: rem(80), height: rem(80) }}
+        style={{ fontSize: 24, minWidth: rem(92), height: rem(92) }}
       >
         {displayData && value.toFixed(1)}
       </Badge>

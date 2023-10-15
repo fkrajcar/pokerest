@@ -7,9 +7,10 @@
 
 .icon {
   position: absolute;
-  top: -30px;
+  top: -46px;
   left: 50%;
   transform: translateX(-50%);
+  background-color: var(--mantine-color-blue-2);
 }
 
 .title {

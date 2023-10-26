@@ -1,7 +1,7 @@
 import { Card, Group, Text, ActionIcon, rem } from '@mantine/core'
 import classes from './UserCard.module.css'
 import { IconX } from '@tabler/icons-react'
-import { IUser } from '@/app/room/[id]/page'
+import { Estimations, IUser } from '@/app/room/[id]/page'
 import { PokerCard } from '../PokerCard/PokerCard'
 
 export interface IUserCardParams {
@@ -16,6 +16,20 @@ export const UserCard = ({
   displayEstimate,
   removeFromRoom,
 }: IUserCardParams) => {
+  const estimateToLabel = (estimateValue?: number) => {
+    if (!estimateValue) {
+      return ''
+    }
+
+    const estimate = Estimations.find(({ value }) => value === estimateValue)
+
+    if (!estimate?.label) {
+      return ''
+    }
+
+    return estimate.label
+  }
+
   return (
     <Card withBorder radius="md" p="md" className={classes.card}>
       <Card.Section className={classes.section} p="md">
@@ -37,6 +51,7 @@ export const UserCard = ({
           displayValue={displayEstimate}
           displayOnly={true}
           value={user.estimate}
+          label={estimateToLabel(user.estimate)}
         />
       }
     </Card>

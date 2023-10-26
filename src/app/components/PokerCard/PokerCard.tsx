@@ -4,6 +4,7 @@ import clsx from 'clsx'
 
 export interface IPokerCardParams {
   value?: number
+  label?: string
   selectedEstimate?: number
   // eslint-disable-next-line
   setEstimateOnUser?: (estimate: number) => void
@@ -14,6 +15,7 @@ export interface IPokerCardParams {
 
 export const PokerCard = ({
   value,
+  label,
   setEstimateOnUser,
   selectedEstimate,
   displayOnly = false,
@@ -43,7 +45,7 @@ export const PokerCard = ({
         !!value && displayOnly && classes.choosen
       )}
     >
-      {displayValue && value}
+      {displayValue && (label ?? value)}
     </Paper>
   )
 }

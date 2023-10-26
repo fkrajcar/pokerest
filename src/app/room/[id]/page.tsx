@@ -2,13 +2,6 @@
 
 import { getCookie, setCookie } from 'cookies-next'
 
-export interface IRoomPageParams {
-  params: IRoomParams
-}
-
-export interface IRoomParams {
-  id: string
-}
 import { database } from '@/firebase/config'
 import {
   collection,
@@ -49,6 +42,64 @@ export interface IUser {
   username: string
   estimate?: number
 }
+export interface IRoomPageParams {
+  params: IRoomParams
+}
+
+export interface IRoomParams {
+  id: string
+}
+
+export const Estimations = [
+  {
+    value: 1,
+    label: '1',
+  },
+  {
+    value: 2,
+    label: '2',
+  },
+  {
+    value: 4,
+    label: '4',
+  },
+  {
+    value: 6,
+    label: '6',
+  },
+  {
+    value: 8,
+    label: '8',
+  },
+  {
+    value: 10,
+    label: '10',
+  },
+  {
+    value: 12,
+    label: '12',
+  },
+  {
+    value: 14,
+    label: '14',
+  },
+  {
+    value: 16,
+    label: '2d',
+  },
+  {
+    value: 24,
+    label: '3d',
+  },
+  {
+    value: 32,
+    label: '4d',
+  },
+  {
+    value: 40,
+    label: '5d',
+  },
+]
 
 export default function Room({ params }: IRoomPageParams) {
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -287,10 +338,11 @@ export default function Room({ params }: IRoomPageParams) {
   return (
     <Container py="md">
       <Group gap={8} justify="center">
-        {[1, 2, 3, 4, 5, 6, 8, 12, 14, 16, 20, 24].map((estimateValue) => (
+        {Estimations.map(({ value, label }) => (
           <PokerCard
-            value={estimateValue}
-            key={estimateValue}
+            value={value}
+            key={value}
+            label={label}
             selectedEstimate={currentUser?.estimate}
             setEstimateOnUser={setEstimateOnUser}
             disableAction={displayData}

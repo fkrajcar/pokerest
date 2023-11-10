@@ -1,8 +1,9 @@
 import { Card, Group, Text, ActionIcon, rem } from '@mantine/core'
 import classes from './UserCard.module.css'
 import { IconX } from '@tabler/icons-react'
-import { Estimations, IUser } from '@/app/room/[id]/page'
+import { IUser } from '@/app/room/[id]/page'
 import { PokerCard } from '../PokerCard/PokerCard'
+import { estimationValues } from '@/app/constants/estimations'
 
 export interface IUserCardParams {
   user: IUser
@@ -21,7 +22,9 @@ export const UserCard = ({
       return ''
     }
 
-    const estimate = Estimations.find(({ value }) => value === estimateValue)
+    const estimate = estimationValues.find(
+      ({ value }) => value === estimateValue
+    )
 
     if (!estimate?.label) {
       return ''

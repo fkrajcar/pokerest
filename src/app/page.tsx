@@ -4,18 +4,8 @@ import { addDoc, collection } from 'firebase/firestore'
 import { database } from '../firebase/config'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import {
-  ActionIcon,
-  Button,
-  Container,
-  Group,
-  LoadingOverlay,
-  useComputedColorScheme,
-  useMantineColorScheme,
-} from '@mantine/core'
-import { IconMoon, IconSun } from '@tabler/icons-react'
-import cx from 'clsx'
-import classes from './Demo.module.css'
+import { Button, Container, Group, LoadingOverlay } from '@mantine/core'
+import ColorSchemeToggle from './components/ColorSchemeToggle/ColorSchemeToggle'
 
 const dbInstance = collection(database, 'rooms')
 
@@ -43,16 +33,7 @@ export default function Home() {
       setIsLoading(false)
     }
   }
-  const { setColorScheme } = useMantineColorScheme()
 
-  // -> computedColorScheme is 'light' | 'dark', argument is the default value
-  const computedColorScheme = useComputedColorScheme('light')
-
-  // Correct color scheme toggle implementation
-  // computedColorScheme is always either 'light' or 'dark'
-  const toggleColorScheme = () => {
-    setColorScheme(computedColorScheme === 'dark' ? 'light' : 'dark')
-  }
   if (isLoading) {
     return (
       <LoadingOverlay
@@ -65,21 +46,7 @@ export default function Home() {
 
   return (
     <Container py="md">
-      <Button onClick={toggleColorScheme}>
-        {/* {colorScheme === 'dark' ? 'Light' : 'Dark'} */}
-        toggle
-      </Button>
-      <ActionIcon
-        onClick={() =>
-          setColorScheme(computedColorScheme === 'light' ? 'dark' : 'light')
-        }
-        variant="default"
-        size="xl"
-        aria-label="Toggle color scheme"
-      >
-        <IconSun className={cx(classes.icon, classes.light)} stroke={1.5} />
-        <IconMoon className={cx(classes.icon, classes.dark)} stroke={1.5} />
-      </ActionIcon>
+      <ColorSchemeToggle />
 
       <Group justify="center">
         <Button onClick={createNewRoom} disabled={isLoading}>

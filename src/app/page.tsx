@@ -5,6 +5,7 @@ import { database } from '../firebase/config'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Button, Container, Group, LoadingOverlay } from '@mantine/core'
+import ColorSchemeToggle from './components/ColorSchemeToggle/ColorSchemeToggle'
 
 const dbInstance = collection(database, 'rooms')
 
@@ -45,6 +46,8 @@ export default function Home() {
 
   return (
     <Container py="md">
+      <ColorSchemeToggle />
+
       <Group justify="center">
         <Button onClick={createNewRoom} disabled={isLoading}>
           Create new room

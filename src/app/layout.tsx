@@ -2,7 +2,6 @@ import './globals.css'
 import { Inter } from 'next/font/google'
 import '@mantine/core/styles.css'
 import { MantineProvider, ColorSchemeScript } from '@mantine/core'
-
 const inter = Inter({ subsets: ['latin'] })
 export const metadata = {
   title: 'Pokerest',
@@ -17,10 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <ColorSchemeScript />
+        <ColorSchemeScript defaultColorScheme="dark" />
       </head>
       <body className={inter.className}>
-        <MantineProvider>{children}</MantineProvider>
+        <MantineProvider defaultColorScheme="dark">{children}</MantineProvider>
       </body>
     </html>
   )

@@ -26,10 +26,18 @@
 }
 
 .selected {
-  border-color: var(--mantine-color-blue-2);
+  border-color: var(--mantine-color-blue-5);
   pointer-events: none;
 }
 
 .choosen {
-  background-color: var(--mantine-color-blue-2);
+  background-color: var(--mantine-color-blue-5);
+}
+
+.card_text {
+  font-weight: 600;
+}
+
+.card_text_dark {
+  color: white;
 }

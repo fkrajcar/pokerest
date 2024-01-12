@@ -36,6 +36,7 @@ import { PokerCard } from '@/app/components/PokerCard/PokerCard'
 import { UserCard } from '@/app/components/UserCard/UserCard'
 import { EstimateCard } from '@/app/components/EstimateCard/EstimateCard'
 import { estimationValues } from '@/app/constants/estimations'
+import ColorSchemeToggle from '@/app/components/ColorSchemeToggle/ColorSchemeToggle'
 const dbInstance = collection(database, 'rooms')
 
 export interface IUser {
@@ -287,6 +288,8 @@ export default function Room({ params }: IRoomPageParams) {
 
   return (
     <Container py="md">
+      <ColorSchemeToggle />
+
       <Group gap={8} justify="center">
         {estimationValues.map(({ value, label }) => (
           <PokerCard

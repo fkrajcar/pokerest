@@ -35,6 +35,7 @@ import {
 import { PokerCard } from '@/app/components/PokerCard/PokerCard'
 import { UserCard } from '@/app/components/UserCard/UserCard'
 import { EstimateCard } from '@/app/components/EstimateCard/EstimateCard'
+import { estimationValues } from '@/app/constants/estimations'
 const dbInstance = collection(database, 'rooms')
 
 export interface IUser {
@@ -49,57 +50,6 @@ export interface IRoomPageParams {
 export interface IRoomParams {
   id: string
 }
-
-export const Estimations = [
-  {
-    value: 1,
-    label: '1',
-  },
-  {
-    value: 2,
-    label: '2',
-  },
-  {
-    value: 4,
-    label: '4',
-  },
-  {
-    value: 6,
-    label: '6',
-  },
-  {
-    value: 8,
-    label: '8',
-  },
-  {
-    value: 10,
-    label: '10',
-  },
-  {
-    value: 12,
-    label: '12',
-  },
-  {
-    value: 14,
-    label: '14',
-  },
-  {
-    value: 16,
-    label: '2d',
-  },
-  {
-    value: 24,
-    label: '3d',
-  },
-  {
-    value: 32,
-    label: '4d',
-  },
-  {
-    value: 40,
-    label: '5d',
-  },
-]
 
 export default function Room({ params }: IRoomPageParams) {
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -338,7 +288,7 @@ export default function Room({ params }: IRoomPageParams) {
   return (
     <Container py="md">
       <Group gap={8} justify="center">
-        {Estimations.map(({ value, label }) => (
+        {estimationValues.map(({ value, label }) => (
           <PokerCard
             value={value}
             key={value}

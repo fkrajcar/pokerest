@@ -1,4 +1,4 @@
-import { Paper, Text } from '@mantine/core'
+import { Paper, Text, useMantineColorScheme } from '@mantine/core'
 import classes from './PokerCard.module.css'
 import clsx from 'clsx'
 
@@ -29,6 +29,7 @@ export const PokerCard = ({
 
     setEstimateOnUser(value)
   }
+  const { colorScheme } = useMantineColorScheme()
 
   return (
     <Paper
@@ -45,7 +46,14 @@ export const PokerCard = ({
         !!value && displayOnly && classes.choosen
       )}
     >
-      <Text>{displayValue && (label ?? value)}</Text>
+      <Text
+        className={clsx(
+          classes.card_text,
+          colorScheme === 'dark' && classes.card_text_dark
+        )}
+      >
+        {displayValue && (label ?? value)}
+      </Text>
     </Paper>
   )
 }

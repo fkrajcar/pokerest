@@ -12,7 +12,7 @@ const ColorSchemeToggle = () => {
   const { setColorScheme } = useMantineColorScheme()
 
   // -> computedColorScheme is 'light' | 'dark', argument is the default value
-  const computedColorScheme = useComputedColorScheme('light')
+  const computedColorScheme = useComputedColorScheme('dark')
 
   // Correct color scheme toggle implementation
   // computedColorScheme is always either 'light' or 'dark'

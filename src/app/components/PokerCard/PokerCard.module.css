@@ -32,10 +32,12 @@
 
 .choosen {
   background-color: var(--mantine-color-blue-5);
+  color: white;
 }
 
 .card_text {
   font-weight: 600;
+  font-size: 20px;
 }
 
 .card_text_dark {

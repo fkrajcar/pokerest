@@ -6,6 +6,21 @@ interface IEstimateCardProps {
   displayData: boolean
 }
 export const EstimateCard = ({ value, displayData }: IEstimateCardProps) => {
+  const getEstimateColor = (estimateValue: number) => {
+    if (estimateValue > 24) {
+      return 'red'
+    }
+
+    if (estimateValue > 16) {
+      return 'orange.7'
+    }
+
+    if (estimateValue > 8) {
+      return 'yellow.7'
+    }
+
+    return 'blue.5'
+  }
   return (
     <Paper radius="md" withBorder className={classes.card} mt={20}>
       <Badge
@@ -22,16 +37,16 @@ export const EstimateCard = ({ value, displayData }: IEstimateCardProps) => {
 
       <Group justify="space-between" mt="xs">
         <Text fz="sm" c="dimmed">
-          1
+          1h
         </Text>
         <Text fz="sm" c="dimmed">
-          24
+          40h
         </Text>
       </Group>
 
       <Progress
-        color="blue.5"
-        value={displayData ? (value / 24) * 100 : 0}
+        color={getEstimateColor(value)}
+        value={displayData ? (value / 40) * 100 : 0}
         mt={5}
       />
     </Paper>

@@ -1,4 +1,4 @@
-import { Paper, Text, useMantineColorScheme } from '@mantine/core'
+import { Button, Paper, Text, useMantineColorScheme } from '@mantine/core'
 import classes from './PokerCard.module.css'
 import clsx from 'clsx'
 
@@ -31,7 +31,7 @@ export const PokerCard = ({
   }
   const { colorScheme } = useMantineColorScheme()
 
-  return (
+  return displayOnly ? (
     <Paper
       withBorder
       radius="md"
@@ -43,7 +43,8 @@ export const PokerCard = ({
         !displayOnly && classes.action,
         disableAction && classes.disabled,
         selectedEstimate && selectedEstimate === value && classes.selected,
-        !!value && displayOnly && classes.choosen
+        !!value && displayOnly && classes.choosen,
+        colorScheme === 'dark' && classes.dark_border
       )}
     >
       <Text
@@ -55,5 +56,28 @@ export const PokerCard = ({
         {displayValue && (label ?? value)}
       </Text>
     </Paper>
+  ) : (
+    <Button
+      radius="md"
+      key={`estimate-Button-${value}`}
+      onClick={() => onClickAction()}
+      className={clsx(
+        classes.card,
+        !displayOnly && classes.action,
+        disableAction && classes.disabled,
+        selectedEstimate && selectedEstimate === value && classes.selected,
+        !!value && displayOnly && classes.choosen,
+        colorScheme === 'dark' && classes.dark_border
+      )}
+    >
+      <Text
+        className={clsx(
+          classes.card_text,
+          colorScheme === 'dark' && classes.card_text_dark
+        )}
+      >
+        {displayValue && (label ?? value)}
+      </Text>
+    </Button>
   )
 }

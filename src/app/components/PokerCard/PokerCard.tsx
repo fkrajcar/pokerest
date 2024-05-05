@@ -31,32 +31,36 @@ export const PokerCard = ({
   }
   const { colorScheme } = useMantineColorScheme()
 
-  return displayOnly ? (
-    <Paper
-      withBorder
-      radius="md"
-      key={`estimate-Button-${value}`}
-      onClick={() => onClickAction()}
-      color="red"
-      className={clsx(
-        classes.card,
-        !displayOnly && classes.action,
-        disableAction && classes.disabled,
-        selectedEstimate && selectedEstimate === value && classes.selected,
-        !!value && displayOnly && classes.choosen,
-        colorScheme === 'dark' && classes.dark_border
-      )}
-    >
-      <Text
+  if (displayOnly) {
+    return (
+      <Paper
+        withBorder
+        radius="md"
+        key={`estimate-Button-${value}`}
+        onClick={() => onClickAction()}
+        color="red"
         className={clsx(
-          classes.card_text,
-          colorScheme === 'dark' && classes.card_text_dark
+          classes.card,
+          !displayOnly && classes.action,
+          disableAction && classes.disabled,
+          selectedEstimate && selectedEstimate === value && classes.selected,
+          !!value && displayOnly && classes.choosen,
+          colorScheme === 'dark' && classes.dark_border
         )}
       >
-        {displayValue && (label ?? value)}
-      </Text>
-    </Paper>
-  ) : (
+        <Text
+          className={clsx(
+            classes.card_text,
+            colorScheme === 'dark' && classes.card_text_dark
+          )}
+        >
+          {displayValue && (label ?? value)}
+        </Text>
+      </Paper>
+    )
+  }
+
+  return (
     <Button
       radius="md"
       key={`estimate-Button-${value}`}
